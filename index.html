@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRM Project — Управление проектами</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root{
+            --brand:#4f46e5; --brand-d:#4338ca; --brand-l:#eef2ff;
+            --ink:#0f172a; --muted:#64748b; --line:#e9edf3; --bg:#f4f6fb;
+            --sidebar:#111827; --sidebar-2:#1f2937;
+            --ok:#16a34a; --warn:#d97706; --danger:#dc2626; --info:#0ea5e9;
+            --radius:16px; --shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+        }
+        *{ -webkit-font-smoothing:antialiased; }
+        body { background: var(--bg); font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; color:var(--ink); }
+        h1,h2,h3,h4,h5{ font-weight:700; letter-spacing:-.01em; }
+        .navbar-brand { font-weight: 800; letter-spacing:-.02em; }
+        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeSlideUp .45s ease forwards; }
+        .delay-1{animation-delay:.05s}.delay-2{animation-delay:.1s}.delay-3{animation-delay:.15s}.delay-4{animation-delay:.2s}
+
+        .hero { background: radial-gradient(1200px 400px at 20% -10%, #6366f1 0%, transparent 60%), linear-gradient(135deg,#0b1220 0%, #1e293b 100%); color:#fff; padding: 90px 24px; border-radius: 24px; margin: 18px 0 30px; text-align:center; }
+        .hero h1 { font-size: 3.2rem; font-weight: 800; }
+        .hero p { font-size: 1.2rem; opacity: .9; }
+        .btn-hero { background: var(--brand); color:#fff; border:none; padding: 14px 38px; border-radius: 50px; font-size:1.05rem; font-weight:600; box-shadow:0 10px 24px rgba(79,70,229,.4); }
+        .btn-hero:hover { background: var(--brand-d); color:#fff; transform:translateY(-2px); }
+        .service-card { transition:.3s; text-align:center; padding:34px 22px; background:#fff; border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow); height:100%; }
+        .service-card:hover { transform: translateY(-8px); box-shadow:0 20px 40px rgba(16,24,40,.12); }
+        .service-card i { font-size: 44px; color: var(--brand); margin-bottom: 15px; }
+        .about-section { background:#fff; border:1px solid var(--line); border-radius:24px; padding:40px; margin-bottom:30px; box-shadow:var(--shadow); }
+        .about-section img { border-radius:16px; width:100%; max-height:350px; object-fit:cover; }
+        .request-form { background:#fff; border:1px solid var(--line); border-radius:24px; padding:40px; box-shadow:var(--shadow); max-width:700px; margin:0 auto 30px; }
+        .footer { background:#0b1220; color:rgba(255,255,255,.7); padding:40px 0 20px; border-radius:24px 24px 0 0; margin-top:40px; text-align:center; }
+        .footer .social i { font-size:22px; margin:0 10px; }
+
+        .admin-sidebar { height:100vh; position:sticky; top:0; background:linear-gradient(180deg,var(--sidebar) 0%, #0b1220 100%); color:#fff; padding:18px 0; overflow-y:auto; }
+        .admin-sidebar .logo { font-size:20px; font-weight:800; padding:6px 22px 18px; margin-bottom:14px; border-bottom:1px solid rgba(255,255,255,.08); display:flex; align-items:center; gap:10px; letter-spacing:-.02em; }
+        .admin-sidebar .logo i{ background:var(--brand); width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; font-size:16px; }
+        .admin-sidebar .nav-section{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.35); padding:14px 22px 6px; }
+        .admin-sidebar .nav-link { color:rgba(255,255,255,.72); border-radius:10px; padding:10px 14px; margin:2px 12px; transition:all .18s; cursor:pointer; font-weight:500; font-size:14.5px; display:flex; align-items:center; }
+        .admin-sidebar .nav-link:hover { background:rgba(255,255,255,.08); color:#fff; }
+        .admin-sidebar .nav-link.active { background:var(--brand); color:#fff; box-shadow:0 8px 18px rgba(79,70,229,.35); }
+        .admin-sidebar .nav-link i { width:22px; margin-right:10px; text-align:center; }
+        .admin-content { padding:26px 30px; max-height:100vh; overflow-y:auto; }
+        .admin-content h1 { font-size:1.7rem; margin-bottom:.2rem; }
+        .admin-page { display:none; }
+        .admin-page.active { display:block; animation:fadeSlideUp .35s ease; }
+
+        .summary-card { padding:20px; background:#fff; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); transition:.2s; display:flex; align-items:center; gap:16px; }
+        .summary-card:hover { transform:translateY(-3px); box-shadow:0 16px 32px rgba(16,24,40,.1); }
+        .summary-card .ic { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; flex:0 0 auto; }
+        .summary-card .number { font-size:26px; font-weight:800; line-height:1.1; }
+        .summary-card .label { color:var(--muted); font-size:13px; font-weight:500; }
+        .ic-blue{ background:var(--brand-l); color:var(--brand);} .ic-green{background:#dcfce7;color:var(--ok);}
+        .ic-amber{ background:#fef3c7;color:var(--warn);} .ic-sky{background:#e0f2fe;color:var(--info);}
+
+        .card{ border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+        .card-header{ background:#fff; border-bottom:1px solid var(--line); font-weight:600; border-radius:var(--radius) var(--radius) 0 0 !important; padding:16px 20px; }
+        .table{ --bs-table-bg:transparent; margin-bottom:0; }
+        .table thead th{ background:#f8fafc; color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.03em; border-bottom:1px solid var(--line); white-space:nowrap; padding:12px 14px; }
+        .table tbody td{ vertical-align:middle; padding:12px 14px; border-color:var(--line); }
+        .table tbody tr:hover{ background:var(--brand-l); }
+        .table-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+        tfoot td{ background:#f8fafc; border-top:2px solid var(--line); }
+
+        .btn{ border-radius:10px; font-weight:600; }
+        .btn-sm{ border-radius:8px; }
+        .btn i { margin-right:5px; }
+        .btn-primary{ background:var(--brand); border-color:var(--brand); }
+        .btn-primary:hover{ background:var(--brand-d); border-color:var(--brand-d); }
+        .btn-icon{ width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
+        .btn-icon i{ margin:0; }
+        .badge{ font-weight:600; padding:.42em .7em; border-radius:8px; font-size:11.5px; }
+        .form-control,.form-select{ border-radius:10px; border-color:#dbe2ea; padding:.55rem .8rem; }
+        .form-control:focus,.form-select:focus{ border-color:var(--brand); box-shadow:0 0 0 3px rgba(79,70,229,.15); }
+        .modal-content{ border:none; border-radius:18px; overflow:hidden; box-shadow:0 24px 60px rgba(16,24,40,.25); }
+        .modal-header{ background:#fff; border-bottom:1px solid var(--line); }
+        .modal .form-label{ font-weight:600; font-size:13.5px; }
+        #chartCanvas { width:100%; height:300px; }
+        .flex-between { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+        .quick-add-btn { height: 42px; }
+        .admin-login-link { cursor:pointer; }
+        .app-fluid { padding-left:0 !important; padding-right:0 !important; max-width:100% !important; }
+        .app-container { transition:all .2s; }
+        .login-form-wrapper { animation:fadeSlideUp .6s ease; }
+        .admin-login-card { border-radius:20px; overflow:hidden; border:none; }
+        .admin-login-card .card-header{ background:linear-gradient(135deg,var(--brand) 0%, var(--brand-d) 100%); color:#fff; font-weight:700; font-size:1.1rem; padding:22px; text-align:center; }
+        .table-wrap-text { max-width:250px; word-break:break-word; white-space:normal; }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .admin-sidebar { height:auto; position:relative; }
+            .admin-sidebar .nav { display:flex; flex-wrap:wrap; }
+            .admin-sidebar .nav-section{ width:100%; }
+            .admin-sidebar .nav-link { padding:8px 12px; margin:2px 6px; font-size:14px; }
+            .admin-content { max-height:none; overflow:visible; padding:18px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="mainNavbar">
+    <div class="container-fluid" id="navbarContainer">
+        <a class="navbar-brand" href="#" onclick="showPublicSite()"><i class="fas fa-cubes"></i> CRMproekt</a>
+        <div class="navbar-nav ms-auto" id="publicNavLinks">
+            <a class="nav-link" href="#services">Услуги</a>
+            <a class="nav-link" href="#about">О нас</a>
+            <a class="nav-link" href="#request">Заявка</a>
+            <a class="nav-link admin-login-link" onclick="showAdminLogin()"><i class="fas fa-user-shield"></i> Админ</a>
+        </div>
+        <div class="navbar-nav ms-auto" id="adminNavLinks" style="display:none;">
+            <button class="btn btn-outline-light btn-sm" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container app-container" id="appContainer">
+
+    <div id="publicSite">
+        <div class="hero">
+            <h1>Управление проектами — просто</h1>
+            <p>Мы помогаем бизнесу реализовывать идеи от концепции до готового решения</p>
+            <a href="#request" class="btn btn-hero"><i class="fas fa-paper-plane"></i> Оставить заявку</a>
+        </div>
+
+        <h2 class="text-center mb-4" id="services"><i class="fas fa-cogs text-primary"></i> Наши услуги</h2>
+        <div class="row g-4 mb-5">
+            <div class="col-md-4"><div class="service-card"><i class="fas fa-code"></i><h5>Разработка ПО</h5><p class="text-muted">Создаём веб-приложения, CRM, мобильные приложения</p></div></div>
+            <div class="col-md-4"><div class="service-card"><i class="fas fa-paint-brush"></i><h5>Дизайн и UX</h5><p class="text-muted">Разрабатываем современный дизайн и прототипы</p></div></div>
+            <div class="col-md-4"><div class="service-card"><i class="fas fa-server"></i><h5>Инфраструктура</h5><p class="text-muted">Настраиваем серверы и облачные решения</p></div></div>
+        </div>
+
+        <div class="about-section" id="about">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2><i class="fas fa-building text-primary"></i> О компании</h2>
+                    <p class="lead">Мы — команда профессионалов с 5-летним опытом в IT-разработке.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check-circle text-success"></i> Более 100 реализованных проектов</li>
+                        <li><i class="fas fa-check-circle text-success"></i> 25+ довольных клиентов</li>
+                        <li><i class="fas fa-check-circle text-success"></i> Гарантия качества и поддержка 24/7</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=350&fit=crop" alt="Команда" />
+                </div>
+            </div>
+        </div>
+
+        <div id="request">
+            <div class="request-form">
+                <h3><i class="fas fa-pen text-primary"></i> Оставьте заявку</h3>
+                <p class="text-center text-muted">Мы свяжемся с вами в ближайшее время</p>
+                <div class="mb-3"><label class="form-label">Ваше имя</label><input id="requestName" class="form-control" placeholder="Иван Иванов"></div>
+                <div class="mb-3"><label class="form-label">Телефон</label><input id="requestPhone" class="form-control" placeholder="+7 999 123-45-67"></div>
+                <div class="mb-3"><label class="form-label">Email</label><input id="requestEmail" class="form-control" placeholder="ivan@mail.ru"></div>
+                <div class="mb-3"><label class="form-label">Дата начала</label><input id="requestStartDate" class="form-control" type="date"></div>
+                <div class="mb-3"><label class="form-label">Дата окончания</label><input id="requestEndDate" class="form-control" type="date"></div>
+                <div class="mb-3"><label class="form-label">Бюджет (₽)</label><input id="requestBudget" class="form-control" type="number" step="1000" placeholder="0"></div>
+                <div class="mb-3"><label class="form-label">Описание</label><textarea id="requestDesc" class="form-control" rows="4" placeholder="Расскажите, что нужно сделать..."></textarea></div>
+                <button class="btn btn-primary w-100" onclick="submitRequest()"><i class="fas fa-paper-plane"></i> Отправить заявку</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="social mb-3">
+                <a href="#"><i class="fab fa-telegram"></i></a>
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
+                <a href="#"><i class="fab fa-vk"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+            <p>© 2025 CRMproekt. Все права защищены.</p>
+        </div>
+    </div>
+
+    <div id="adminPanel" style="display:none;">
+
+        <div id="adminLoginForm" style="display:none;">
+            <div class="row justify-content-center" style="padding: 40px 0;">
+                <div class="col-md-6 login-form-wrapper">
+                    <div class="card admin-login-card shadow-lg">
+                        <div class="card-header" id="adminAuthTitle">Вход в админ-панель</div>
+                        <div class="card-body">
+                            <div id="adminLoginBlock">
+                                <div class="mb-3"><label class="form-label">Логин</label><input id="adminLoginEmail" class="form-control" value=""></div>
+                                <div class="mb-3"><label class="form-label">Пароль</label><input id="adminLoginPassword" class="form-control" type="password" value=""></div>
+                                <button class="btn btn-primary" onclick="adminLogin()"><i class="fas fa-sign-in-alt"></i> Войти</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="adminDashboard" style="display:none;">
+            <div class="row g-0">
+                <div class="col-md-2 admin-sidebar d-flex flex-column">
+                    <div class="logo"><i class="fas fa-cubes"></i> CRMproekt</div>
+                    <nav class="nav flex-column">
+                        <div class="nav-section">Обзор</div>
+                        <a class="nav-link active" data-page="dashboard"><i class="fas fa-chart-line"></i> Главная</a>
+                        <div class="nav-section">Работа</div>
+                        <a class="nav-link" data-page="requests"><i class="fas fa-inbox"></i> Заявки</a>
+                        <a class="nav-link" data-page="clients"><i class="fas fa-users"></i> Клиенты</a>
+                        <a class="nav-link" data-page="projects"><i class="fas fa-folder-open"></i> Проекты</a>
+                        <a class="nav-link" data-page="orders"><i class="fas fa-receipt"></i> Заказы</a>
+                        <a class="nav-link" data-page="calculation"><i class="fas fa-calculator"></i> Расчёт</a>
+                        <div class="nav-section">Настройки</div>
+                        <a class="nav-link" data-page="reference"><i class="fas fa-book"></i> Справочник</a>
+                    </nav>
+                </div>
+                <div class="col-md-10 admin-content">
+
+                    <div id="admin-dashboard" class="admin-page active">
+                        <h1 class="mb-4"><i class="fas fa-chart-pie text-primary"></i> Панель управления</h1>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3 fade-in delay-1"><div class="summary-card"><div class="ic ic-sky"><i class="fas fa-inbox"></i></div><div><div class="number" id="statRequests">0</div><div class="label">Заявок</div></div></div></div>
+                            <div class="col-md-3 fade-in delay-2"><div class="summary-card"><div class="ic ic-blue"><i class="fas fa-users"></i></div><div><div class="number" id="statClients">0</div><div class="label">Клиентов</div></div></div></div>
+                            <div class="col-md-3 fade-in delay-3"><div class="summary-card"><div class="ic ic-amber"><i class="fas fa-folder-open"></i></div><div><div class="number" id="statProjects">0</div><div class="label">Проектов</div></div></div></div>
+                            <div class="col-md-3 fade-in delay-4"><div class="summary-card"><div class="ic ic-green"><i class="fas fa-ruble-sign"></i></div><div><div class="number" id="statRevenue">0 ₽</div><div class="label">Выручка</div></div></div></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 fade-in">
+                                <div class="card">
+                                    <div class="card-header">Распределение проектов по типам</div>
+                                    <div class="card-body"><canvas id="chartCanvas" height="250"></canvas></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 fade-in">
+                                <div class="card">
+                                    <div class="card-header">Последние заявки</div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover mb-0">
+                                                <thead><tr><th>Имя</th><th>Телефон</th><th>Описание</th><th>Время</th></tr></thead>
+                                                <tbody id="lastRequestsTable"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="admin-requests" class="admin-page">
+                        <h1><i class="fas fa-inbox text-primary"></i> Заявки</h1>
+                        <div class="table-responsive table-card">
+                            <table class="table table-hover">
+                                <thead><tr><th>Имя</th><th>Телефон</th><th>Email</th><th>Начало</th><th>Окончание</th><th>Бюджет</th><th>Описание</th><th>Дата</th><th>Статус</th><th>Действия</th></tr></thead>
+                                <tbody id="adminRequestsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="admin-clients" class="admin-page">
+                        <div class="flex-between mb-3">
+                            <h1><i class="fas fa-users text-primary"></i> Клиенты</h1>
+                            <button class="btn btn-primary" onclick="openClientModal()"><i class="fas fa-plus"></i> Добавить</button>
+                        </div>
+                        <div class="input-group mb-3" style="max-width:420px;">
+                            <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                            <input id="clientSearch" class="form-control" placeholder="Поиск по имени, телефону, заказам..." oninput="renderAdminClients()">
+                        </div>
+                        <div class="table-responsive table-card">
+                            <table class="table table-hover">
+                                <thead><tr><th>Наименование</th><th>Телефон</th><th>Email</th><th>Заказы</th><th>Долг</th><th>Действия</th></tr></thead>
+                                <tbody id="adminClientsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="admin-projects" class="admin-page">
+                        <div class="flex-between mb-3">
+                            <h1><i class="fas fa-folder-open text-primary"></i> Проекты</h1>
+                            <button class="btn btn-primary" onclick="openProjectModal()"><i class="fas fa-plus"></i> Создать проект</button>
+                        </div>
+                        <div class="input-group mb-3" style="max-width:420px;">
+                            <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                            <input id="projectSearch" class="form-control" placeholder="Поиск по названию, заказчику, типу, дате, сумме..." oninput="renderAdminProjects()">
+                        </div>
+                        <div class="table-responsive table-card">
+                            <table class="table table-hover">
+                                <thead><tr><th>Название</th><th>Заказчик</th><th>Тип</th><th>Конечная дата</th><th>Сумма</th><th>Статус</th><th>Действия</th></tr></thead>
+                                <tbody id="adminProjectsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="admin-orders" class="admin-page">
+                        <div class="flex-between mb-3">
+                            <h1><i class="fas fa-receipt text-primary"></i> Заказы</h1>
+                            <button class="btn btn-primary" onclick="openOrderModal()"><i class="fas fa-plus"></i> Добавить заказ</button>
+                        </div>
+                        <div class="input-group mb-3" style="max-width:420px;">
+                            <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                            <input id="orderSearch" class="form-control" placeholder="Поиск по заказу, проекту, типу..." oninput="renderAdminOrders()">
+                        </div>
+                        <div class="table-responsive table-card">
+                            <table class="table table-hover">
+                                <thead><tr><th>Проект</th><th>Заказ</th><th>Тип</th><th>Дата</th><th class="text-end">Сумма</th><th>Действия</th></tr></thead>
+                                <tbody id="adminOrdersTable"></tbody>
+                                <tfoot id="ordersTotal"></tfoot>
+                            </table>
+                        </div>
+                        <div class="mt-2 text-muted small"><i class="fas fa-info-circle"></i> Сумма заказа берётся из итоговой суммы расчёта проекта (Σ прибыли A7).</div>
+                    </div>
+
+                    <div id="admin-calculation" class="admin-page">
+                        <div class="flex-between mb-3">
+                            <h1><i class="fas fa-calculator text-primary"></i> Расчёт проекта</h1>
+                            <div class="d-flex gap-2">
+                                <select id="calcProjectSelect" class="form-select" style="width:250px;" onchange="loadAdminCalculation()"></select>
+                                <button class="btn btn-success" onclick="openItemModal()"><i class="fas fa-plus"></i> Добавить строку</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive table-card">
+                            <table class="table table-hover">
+                                <thead><tr><th>Наименование</th><th>Кол-во (A1)</th><th>Стоимость (A2)</th><th>Сумма (A3)</th><th>Налог (A4)</th><th>Себест. за ед. (A5)</th><th>Сумма себест. (A6)</th><th>Прибыль (A7)</th><th>Действия</th></tr></thead>
+                                <tbody id="calcTable"></tbody>
+                                <tfoot id="calcTotals"></tfoot>
+                            </table>
+                        </div>
+                        <div class="mt-2 text-muted small">
+                            <i class="fas fa-info-circle"></i> Ставки налога: 5%, 7%, 10%, 22%<br>
+                            <b>Сумма (A3)</b> = Кол-во (A1) × Стоимость (A2)<br>
+                            <b>Налог (A4)</b> = Сумма (A3) × ставка<br>
+                            <b>Сумма себест. (A6)</b> = Кол-во (A1) × Себест. за ед. (A5) + Налог (A4)<br>
+                            <b>Прибыль (A7)</b> = Сумма (A3) − Сумма себест. (A6)
+                        </div>
+                    </div>
+
+                    <div id="admin-reference" class="admin-page">
+                        <div class="flex-between mb-3">
+                            <h1><i class="fas fa-book text-primary"></i> Справочник типов проектов</h1>
+                            <button class="btn btn-primary" onclick="showModal('modal-type')"><i class="fas fa-plus"></i> Добавить тип</button>
+                        </div>
+                        <div class="table-responsive table-card">
+                            <table class="table table-hover">
+                                <thead><tr><th>Название</th><th>Действия</th></tr></thead>
+                                <tbody id="adminTypesTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-client" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title"><i class="fas fa-user-plus"></i> Клиент</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-2"><label class="form-label">Наименование</label><input id="clientName" class="form-control" placeholder="Введите название"></div>
+                <div class="mb-2"><label class="form-label">Телефон</label><input id="clientPhone" class="form-control" placeholder="+7 (999) 123-45-67"></div>
+                <div class="mb-2"><label class="form-label">Email</label><input id="clientEmail" class="form-control" placeholder="example@mail.ru"></div>
+                <div class="mb-2"><label class="form-label">Долг (₽)</label><input id="clientDebt" class="form-control" type="number" step="0.01" placeholder="0.00"></div>
+                <input type="hidden" id="clientEditId" value="">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button class="btn btn-primary" onclick="saveAdminClient()"><i class="fas fa-save"></i> Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-project" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title"><i class="fas fa-folder-plus"></i> Проект</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-2"><label class="form-label">Название проекта</label><input id="projName" class="form-control" placeholder="Введите название"></div>
+                <div class="mb-2">
+                    <label class="form-label">Заказчик</label>
+                    <div class="d-flex gap-2">
+                        <select id="projClient" class="form-select"></select>
+                        <button class="btn btn-primary btn-sm quick-add-btn" onclick="quickAddClient()"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="mb-2"><label class="form-label">Тип проекта</label><select id="projType" class="form-select"></select></div>
+                <div class="mb-2"><label class="form-label">Конечная дата</label><input id="projEndDate" class="form-control" type="date"></div>
+                <div class="mb-2"><label class="form-label">Сумма (₽)</label><input id="projSum" class="form-control" type="number" step="0.01" placeholder="0.00"></div>
+                <div class="mb-2"><label class="form-label">Статус</label>
+                    <select id="projStatus" class="form-select">
+                        <option value="Новый">Новый</option>
+                        <option value="В работе">В работе</option>
+                        <option value="Завершён">Завершён</option>
+                    </select>
+                </div>
+                <div class="mb-2"><label class="form-label">Описание</label><textarea id="projDesc" class="form-control" rows="3" placeholder="Подробности..."></textarea></div>
+                <input type="hidden" id="projEditId" value="">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button class="btn btn-primary" onclick="saveAdminProject()"><i class="fas fa-save"></i> Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-item" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title"><i class="fas fa-calculator"></i> Строка расчёта</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-2"><label class="form-label">Наименование</label><input id="itemName" class="form-control" placeholder="Что за работа / товар"></div>
+                <div class="mb-2"><label class="form-label">Количество (A1)</label><input id="itemQty" class="form-control" type="number" step="1" placeholder="1" value="1"></div>
+                <div class="mb-2"><label class="form-label">Стоимость за единицу (A2, ₽)</label><input id="itemPrice" class="form-control" type="number" step="0.01" placeholder="0.00" value="0"></div>
+                <div class="mb-2"><label class="form-label">Ставка налога</label>
+                    <select id="itemTaxRate" class="form-select">
+                        <option value="5" selected>5%</option>
+                        <option value="7">7%</option>
+                        <option value="10">10%</option>
+                        <option value="22">22%</option>
+                    </select>
+                </div>
+                <div class="mb-2"><label class="form-label">Себестоимость за единицу (A5, ₽)</label><input id="itemCost" class="form-control" type="number" step="0.01" placeholder="0.00" value="0"></div>
+                <input type="hidden" id="itemEditId" value="">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button class="btn btn-success" onclick="saveAdminItem()"><i class="fas fa-save"></i> Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-type" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title"><i class="fas fa-tag"></i> Новый тип проекта</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-2"><label class="form-label">Название типа</label><input id="typeName" class="form-control" placeholder="Например: Ремонт, Дизайн..."></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button class="btn btn-primary" onclick="saveAdminType()"><i class="fas fa-save"></i> Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-order" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title"><i class="fas fa-receipt"></i> Заказ</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-2"><label class="form-label">Проект</label><select id="orderProject" class="form-select" onchange="updateOrderSumPreview()"></select></div>
+                <div class="mb-2"><label class="form-label">Название заказа</label><input id="orderName" class="form-control" placeholder="Напр.: Заказ №1"></div>
+                <div class="mb-2"><label class="form-label">Тип</label><input id="orderType" class="form-control" placeholder="Напр.: Услуга, Поставка..."></div>
+                <div class="mb-2"><label class="form-label">Сумма (из расчёта проекта)</label>
+                    <input id="orderSumPreview" class="form-control" readonly value="0.00 ₽">
+                    <div class="form-text">Считается автоматически как Σ прибыли (A7) выбранного проекта.</div>
+                </div>
+                <input type="hidden" id="orderEditId" value="">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button class="btn btn-primary" onclick="saveAdminOrder()"><i class="fas fa-save"></i> Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-client-view" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title"><i class="fas fa-id-card"></i> Карточка клиента</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="card mb-3"><div class="card-body" id="clientViewInfo"></div></div>
+                <h6 class="mb-2"><i class="fas fa-folder-open text-primary"></i> Проекты и заказы клиента</h6>
+                <div class="table-responsive table-card mb-3">
+                    <table class="table mb-0"><thead><tr><th>Проект</th><th>Тип</th><th>Статус</th><th class="text-end">Сумма расчёта</th></tr></thead>
+                    <tbody id="clientViewProjects"></tbody></table>
+                </div>
+                <h6 class="mb-2"><i class="fas fa-star text-warning"></i> Отзывы</h6>
+                <div id="clientViewReviews" class="mb-3"></div>
+                <div class="input-group">
+                    <input id="reviewText" class="form-control" placeholder="Новый отзыв...">
+                    <select id="reviewRating" class="form-select" style="max-width:110px;">
+                        <option value="5">★★★★★</option>
+                        <option value="4">★★★★</option>
+                        <option value="3">★★★</option>
+                        <option value="2">★★</option>
+                        <option value="1">★</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="addClientReview()"><i class="fas fa-plus"></i> Добавить</button>
+                </div>
+                <input type="hidden" id="clientViewId" value="">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+    const API_BASE = '/api';
+
+    let admins = [];
+    let requests = [];
+    let clients = [];
+    let projectTypes = [];
+    let projects = [];
+    let projectItems = [];
+    let orders = [];
+    let reviews = [];
+
+    let currentAdmin = null;
+
+    async function fetchAPI(endpoint, method = 'GET', body = null) {
+        const options = {
+            method: method,
+            headers: { 'Content-Type': 'application/json' }
+        };
+        if (body) {
+            options.body = JSON.stringify(body);
+        }
+        const response = await fetch(API_BASE + endpoint, options);
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Ошибка запроса');
+        }
+        return await response.json();
+    }
+
+    async function loadAllData() {
+        try {
+            [requests, clients, projectTypes, projects, orders] = await Promise.all([
+                fetchAPI('/requests'),
+                fetchAPI('/clients'),
+                fetchAPI('/project-types'),
+                fetchAPI('/projects'),
+                fetchAPI('/orders')
+            ]);
+        } catch (e) {
+            console.error('Ошибка загрузки данных:', e);
+            alert('Не удалось загрузить данные с сервера');
+        }
+    }
+
+    function showPublicSite() {
+        document.getElementById('publicSite').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('appContainer').classList.remove('app-fluid');
+        document.getElementById('publicNavLinks').style.display = 'flex';
+        document.getElementById('adminNavLinks').style.display = 'none';
+    }
+
+    function showAdminLogin() {
+        document.getElementById('publicSite').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('adminLoginForm').style.display = 'block';
+        document.getElementById('adminDashboard').style.display = 'none';
+        document.getElementById('appContainer').classList.add('app-fluid');
+        document.getElementById('publicNavLinks').style.display = 'none';
+        document.getElementById('adminNavLinks').style.display = 'flex';
+    }
+
+    function showAdminDashboard() {
+        document.getElementById('adminLoginForm').style.display = 'none';
+        document.getElementById('adminDashboard').style.display = 'block';
+        loadAllData().then(() => {
+            renderAdminDashboard();
+            renderAdminRequests();
+            renderAdminClients();
+            renderAdminProjects();
+            renderAdminOrders();
+            loadAdminCalculation();
+            renderAdminTypes();
+        });
+    }
+
+    async function adminLogin() {
+        const login = document.getElementById('adminLoginEmail').value.trim();
+        const password = document.getElementById('adminLoginPassword').value.trim();
+        try {
+            const data = await fetchAPI('/admin/login', 'POST', { login, password });
+            if (data.error) { alert(data.error); return; }
+            currentAdmin = data;
+            showAdminDashboard();
+            document.getElementById('adminLoginEmail').value = '';
+            document.getElementById('adminLoginPassword').value = '';
+        } catch (e) {
+            alert(e.message);
+        }
+    }
+
+    function adminLogout() {
+        currentAdmin = null;
+        showPublicSite();
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    async function submitRequest() {
+        const name = document.getElementById('requestName').value.trim();
+        const phone = document.getElementById('requestPhone').value.trim();
+        const email = document.getElementById('requestEmail').value.trim();
+        const startDate = document.getElementById('requestStartDate').value;
+        const endDate = document.getElementById('requestEndDate').value;
+        const budget = parseFloat(document.getElementById('requestBudget').value) || 0;
+        const description = document.getElementById('requestDesc').value.trim();
+
+        if (!name || !phone || !description) { alert('Заполните имя, телефон и описание'); return; }
+
+        try {
+            await fetchAPI('/requests', 'POST', {
+                name, phone, email, startDate, endDate, budget, description
+            });
+            alert('Заявка отправлена!');
+            
+            document.getElementById('requestName').value = '';
+            document.getElementById('requestPhone').value = '';
+            document.getElementById('requestEmail').value = '';
+            document.getElementById('requestStartDate').value = '';
+            document.getElementById('requestEndDate').value = '';
+            document.getElementById('requestBudget').value = '';
+            document.getElementById('requestDesc').value = '';
+        } catch (e) {
+            alert('Ошибка: ' + e.message);
+        }
+    }
+
+    function renderAdminDashboard() {
+        document.getElementById('statRequests').textContent = requests.length;
+        document.getElementById('statClients').textContent = clients.length;
+        document.getElementById('statProjects').textContent = projects.length;
+        let revenue = projects.reduce((sum, p) => sum + (p.totalSum || 0), 0);
+        document.getElementById('statRevenue').textContent = revenue.toFixed(2) + ' ₽';
+
+        const last = requests.slice(0, 5);
+        let html = '';
+        last.forEach(r => {
+            const timeStr = r.time ? ` ${r.time}` : '';
+            html += `<tr><td>${r.name}</td><td>${r.phone}</td><td class="table-wrap-text">${r.description}</td><td>${r.date}${timeStr}</td></tr>`;
+        });
+        document.getElementById('lastRequestsTable').innerHTML = html || '<tr><td colspan="4">Нет заявок</td></tr>';
+
+        drawAdminChart();
+    }
+
+    function drawAdminChart() {
+        const canvas = document.getElementById('chartCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.parentElement.clientWidth || 400;
+        const h = 250;
+        canvas.width = w; canvas.height = h;
+        ctx.clearRect(0, 0, w, h);
+
+        const typeCount = {};
+        projects.forEach(p => { const t = p.type || 'Без типа'; typeCount[t] = (typeCount[t]||0)+1; });
+        const types = Object.keys(typeCount);
+        if (types.length === 0) {
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Нет проектов', w/2, h/2);
+            return;
+        }
+        const total = projects.length;
+        const colors = ['#3b7ddd','#28a745','#ffc107','#dc3545','#6f42c1','#fd7e14','#20c997'];
+        let start = -Math.PI/2;
+        const centerX = w*0.35, centerY = h/2, radius = Math.min(w*0.25, h*0.4), legendX = w*0.65;
+        types.forEach((type, i) => {
+            const count = typeCount[type];
+            const angle = (count/total)*2*Math.PI;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, start, start+angle);
+            ctx.closePath();
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.fill();
+            start += angle;
+        });
+        let legY = 20;
+        types.forEach((type, i) => {
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.fillRect(legendX, legY, 16, 16);
+            ctx.fillStyle = '#333';
+            ctx.font = '13px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`${type} (${typeCount[type]})`, legendX+22, legY+13);
+            legY += 24;
+        });
+        if (total === 0) {
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Нет проектов', centerX, centerY+5);
+        } else if (types.length === 1) {
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('100%', centerX, centerY);
+        }
+    }
+
+    function renderAdminRequests() {
+        let html = '';
+        requests.forEach(r => {
+            const statusColor = r.status === 'новая' ? 'secondary' : (r.status === 'в работе' ? 'warning' : 'success');
+            const timeStr = r.time ? ` ${r.time}` : '';
+            html += `
+                <tr>
+                    <td>${r.name}</td>
+                    <td>${r.phone}</td>
+                    <td>${r.email || ''}</td>
+                    <td>${r.startDate || ''}</td>
+                    <td>${r.endDate || ''}</td>
+                    <td>${r.budget || 0} ₽</td>
+                    <td class="table-wrap-text">${r.description}</td>
+                    <td>${r.date}${timeStr}</td>
+                    <td><span class="badge bg-${statusColor}">${r.status}</span></td>
+                    <td>
+                        <button class="btn btn-success btn-sm" onclick="convertRequestToClient(${r.id})"><i class="fas fa-user-plus"></i> В клиента</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteRequest(${r.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.getElementById('adminRequestsTable').innerHTML = html || '<tr><td colspan="10">Нет заявок</td></tr>';
+    }
+
+    async function convertRequestToClient(requestId) {
+        const request = requests.find(r => r.id === requestId);
+        if (!request) return;
+        let client = clients.find(c => c.phone === request.phone || c.email === request.email);
+        if (!client) {
+            const newClient = await fetchAPI('/clients', 'POST', {
+                name: request.name,
+                phone: request.phone,
+                email: request.email || '',
+                debt: 0
+            });
+            client = { id: newClient.id, name: request.name, phone: request.phone, email: request.email || '', debt: 0 };
+            clients.push(client);
+        }
+        const projData = {
+            name: `Проект от ${request.name}`,
+            clientId: client.id,
+            type: 'Без типа',
+            endDate: request.endDate || '',
+            totalSum: request.budget || 0,
+            status: 'Новый',
+            description: request.description
+        };
+        const newProject = await fetchAPI('/projects', 'POST', projData);
+        projects.push({ id: newProject.id, ...projData });
+        await fetchAPI(`/requests/${requestId}`, 'PUT', { status: 'обработана' });
+        request.status = 'обработана';
+        renderAdminRequests();
+        renderAdminProjects();
+        renderAdminClients();
+        renderAdminDashboard();
+        alert('Заявка преобразована в клиента и проект!');
+    }
+
+    async function deleteRequest(id) {
+        if (!confirm('Удалить заявку?')) return;
+        await fetchAPI(`/requests/${id}`, 'DELETE');
+        requests = requests.filter(r => r.id !== id);
+        renderAdminRequests();
+        renderAdminDashboard();
+    }
+
+    function clientOrders(clientId) {
+        const projIds = projects.filter(p => p.clientId === clientId).map(p => p.id);
+        return orders.filter(o => projIds.includes(o.projectId));
+    }
+
+    function renderAdminClients() {
+        const q = (document.getElementById('clientSearch')?.value || '').toLowerCase().trim();
+        let html = '';
+        clients.filter(c => {
+            if (!q) return true;
+            const ords = clientOrders(c.id).map(o => o.name).join(' ');
+            return (`${c.name} ${c.phone||''} ${c.email||''} ${ords}`).toLowerCase().includes(q);
+        }).forEach(c => {
+            const ordCount = clientOrders(c.id).length;
+            html += `
+                <tr>
+                    <td>${c.name}</td>
+                    <td>${c.phone || ''}</td>
+                    <td>${c.email || ''}</td>
+                    <td><span class="badge bg-light text-dark">${ordCount}</span></td>
+                    <td>${c.debt || 0} ₽</td>
+                    <td>
+                        <button class="btn btn-outline-secondary btn-sm btn-icon" title="Карточка" onclick="openClientView(${c.id})"><i class="fas fa-eye"></i></button>
+                        <button class="btn btn-primary btn-sm btn-icon" title="Изменить" onclick="editAdminClient(${c.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm btn-icon" title="Удалить" onclick="deleteAdminClient(${c.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.getElementById('adminClientsTable').innerHTML = html || '<tr><td colspan="6" class="text-muted text-center">Ничего не найдено</td></tr>';
+    }
+
+    function openClientModal() {
+        document.getElementById('clientName').value = '';
+        document.getElementById('clientPhone').value = '';
+        document.getElementById('clientEmail').value = '';
+        document.getElementById('clientDebt').value = '';
+        document.getElementById('clientEditId').value = '';
+        showModal('modal-client');
+    }
+
+    function editAdminClient(id) {
+        const client = clients.find(c => c.id === id);
+        if (!client) return;
+        document.getElementById('clientName').value = client.name;
+        document.getElementById('clientPhone').value = client.phone || '';
+        document.getElementById('clientEmail').value = client.email || '';
+        document.getElementById('clientDebt').value = client.debt || 0;
+        document.getElementById('clientEditId').value = id;
+        showModal('modal-client');
+    }
+
+    async function saveAdminClient() {
+        const name = document.getElementById('clientName').value.trim();
+        if (!name) { alert('Введите наименование'); return; }
+        const phone = document.getElementById('clientPhone').value.trim();
+        const email = document.getElementById('clientEmail').value.trim();
+        const debt = parseFloat(document.getElementById('clientDebt').value) || 0;
+        const editId = document.getElementById('clientEditId').value;
+        if (editId) {
+            await fetchAPI(`/clients/${editId}`, 'PUT', { name, phone, email, debt });
+            const idx = clients.findIndex(c => c.id === parseInt(editId));
+            if (idx !== -1) clients[idx] = { ...clients[idx], name, phone, email, debt };
+        } else {
+            const newClient = await fetchAPI('/clients', 'POST', { name, phone, email, debt });
+            clients.push({ id: newClient.id, name, phone, email, debt });
+        }
+        renderAdminClients();
+        hideModal('modal-client');
+        document.getElementById('clientName').value = '';
+        document.getElementById('clientPhone').value = '';
+        document.getElementById('clientEmail').value = '';
+        document.getElementById('clientDebt').value = '';
+        document.getElementById('clientEditId').value = '';
+    }
+
+    async function deleteAdminClient(id) {
+        if (!confirm('Удалить клиента?')) return;
+        await fetchAPI(`/clients/${id}`, 'DELETE');
+        clients = clients.filter(c => c.id !== id);
+        renderAdminClients();
+        renderAdminDashboard();
+    }
+
+    function renderAdminProjects() {
+        const q = (document.getElementById('projectSearch')?.value || '').toLowerCase().trim();
+        let html = '';
+        projects.filter(p => {
+            if (!q) return true;
+            const client = clients.find(c => c.id === p.clientId);
+            const clientName = client ? client.name : '';
+            return (`${p.name} ${clientName} ${p.type||''} ${p.endDate||''} ${p.totalSum||0}`).toLowerCase().includes(q);
+        }).forEach(p => {
+            const client = clients.find(c => c.id === p.clientId);
+            const clientName = client ? client.name : '—';
+            const statusColor = p.status === 'Завершён' ? 'success' : (p.status === 'В работе' ? 'warning' : 'secondary');
+            html += `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${clientName}</td>
+                    <td>${p.type || ''}</td>
+                    <td>${p.endDate || ''}</td>
+                    <td>${p.totalSum || 0} ₽</td>
+                    <td><span class="badge bg-${statusColor}">${p.status || 'Новый'}</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="editAdminProject(${p.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteAdminProject(${p.id})"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-info btn-sm" onclick="goToAdminCalculation(${p.id})"><i class="fas fa-calculator"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.getElementById('adminProjectsTable').innerHTML = html || '<tr><td colspan="7">Нет проектов</td></tr>';
+    }
+
+    function openProjectModal(projectId) {
+        const isEdit = !!projectId;
+        const project = isEdit ? projects.find(p => p.id === projectId) : null;
+        const clientSelect = document.getElementById('projClient');
+        clientSelect.innerHTML = clients.map(c =>
+            `<option value="${c.id}" ${project && project.clientId === c.id ? 'selected' : ''}>${c.name}</option>`
+        ).join('');
+        const typeSelect = document.getElementById('projType');
+        typeSelect.innerHTML = projectTypes.map(t =>
+            `<option value="${t.id}" ${project && project.type === t.name ? 'selected' : ''}>${t.name}</option>`
+        ).join('');
+
+        document.getElementById('projName').value = project ? project.name : '';
+        document.getElementById('projEndDate').value = project ? project.endDate : '';
+        document.getElementById('projSum').value = project ? project.totalSum : '';
+        document.getElementById('projStatus').value = project ? project.status : 'Новый';
+        document.getElementById('projDesc').value = project ? project.description : '';
+        document.getElementById('projEditId').value = projectId || '';
+
+        showModal('modal-project');
+    }
+
+    function editAdminProject(id) { openProjectModal(id); }
+
+    async function saveAdminProject() {
+        const id = document.getElementById('projEditId').value;
+        const name = document.getElementById('projName').value.trim();
+        const clientId = parseInt(document.getElementById('projClient').value);
+        const type = document.getElementById('projType').value;
+        const endDate = document.getElementById('projEndDate').value;
+        const totalSum = parseFloat(document.getElementById('projSum').value) || 0;
+        const status = document.getElementById('projStatus').value;
+        const description = document.getElementById('projDesc').value.trim();
+
+        if (!name) { alert('Введите название проекта'); return; }
+        if (!clientId) { alert('Выберите заказчика'); return; }
+
+        if (id) {
+            await fetchAPI(`/projects/${id}`, 'PUT', { name, clientId, type, endDate, totalSum, status, description });
+            const idx = projects.findIndex(p => p.id === parseInt(id));
+            if (idx !== -1) projects[idx] = { ...projects[idx], name, clientId, type, endDate, totalSum, status, description };
+        } else {
+            const newProject = await fetchAPI('/projects', 'POST', { name, clientId, type, endDate, totalSum, status, description });
+            projects.push({ id: newProject.id, name, clientId, type, endDate, totalSum, status, description });
+        }
+        renderAdminProjects();
+        renderAdminDashboard();
+        hideModal('modal-project');
+    }
+
+    async function deleteAdminProject(id) {
+        if (!confirm('Удалить проект? Все строки расчёта будут удалены.')) return;
+        await fetchAPI(`/projects/${id}`, 'DELETE');
+        projects = projects.filter(p => p.id !== id);
+        projectItems = projectItems.filter(it => it.projectId !== id);
+        renderAdminProjects();
+        renderAdminDashboard();
+        if (document.getElementById('admin-calculation').classList.contains('active')) loadAdminCalculation();
+    }
+
+    function goToAdminCalculation(projectId) {
+        document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
+        document.getElementById('admin-calculation').classList.add('active');
+        document.querySelectorAll('.admin-sidebar .nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelector('.admin-sidebar .nav-link[data-page="calculation"]').classList.add('active');
+        const select = document.getElementById('calcProjectSelect');
+        select.value = projectId;
+        loadAdminCalculation();
+    }
+
+    function renderAdminOrders() {
+        const q = (document.getElementById('orderSearch')?.value || '').toLowerCase().trim();
+        let html = '';
+        let totalAll = 0;
+        const filtered = orders.filter(o => {
+            const proj = projects.find(p => p.id === o.projectId);
+            const projName = proj ? proj.name : '';
+            if (!q) return true;
+            return (`${projName} ${o.name||''} ${o.type||''}`).toLowerCase().includes(q);
+        });
+        filtered.forEach(o => {
+            const proj = projects.find(p => p.id === o.projectId);
+            const projName = proj ? proj.name : '— (проект удалён)';
+            const sum = Number(o.sum) || 0;
+            totalAll += sum;
+            html += `
+                <tr>
+                    <td>${projName}</td>
+                    <td>${o.name || ''}</td>
+                    <td>${o.type || ''}</td>
+                    <td>${o.date || ''}</td>
+                    <td class="text-end">${sum.toFixed(2)} ₽</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm btn-icon" title="Изменить" onclick="openOrderModal(${o.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm btn-icon" title="Удалить" onclick="deleteAdminOrder(${o.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.getElementById('adminOrdersTable').innerHTML = html || '<tr><td colspan="6" class="text-muted text-center">Нет заказов</td></tr>';
+        document.getElementById('ordersTotal').innerHTML = `
+            <tr style="font-weight:700;">
+                <td colspan="4" class="text-end">Сумма всех заказов:</td>
+                <td class="text-end">${totalAll.toFixed(2)} ₽</td>
+                <td></td>
+            </tr>`;
+    }
+
+    function projectCalcTotal(projectId) {
+        const o = orders.find(x => x.projectId === projectId);
+        
+        if (o && o.sum != null) return Number(o.sum);
+        return projectItems.filter(it => it.projectId === projectId)
+                           .reduce((s, it) => s + (Number(it.profit) || 0), 0);
+    }
+
+    async function updateOrderSumPreview() {
+        const projectId = parseInt(document.getElementById('orderProject').value);
+        const field = document.getElementById('orderSumPreview');
+        if (!projectId) { field.value = '0.00 ₽'; return; }
+        try {
+            const items = await fetchAPI(`/project-items?projectId=${projectId}`);
+            const total = items.reduce((s, it) => s + (Number(it.profit) || 0), 0);
+            field.value = total.toFixed(2) + ' ₽';
+        } catch (e) {
+            field.value = '0.00 ₽';
+        }
+    }
+
+    function openOrderModal(orderId) {
+        if (projects.length === 0) { alert('Сначала создайте хотя бы один проект'); return; }
+        const order = orderId ? orders.find(o => o.id === orderId) : null;
+        const select = document.getElementById('orderProject');
+        select.innerHTML = projects.map(p =>
+            `<option value="${p.id}" ${order && order.projectId === p.id ? 'selected' : ''}>${p.name}</option>`
+        ).join('');
+        document.getElementById('orderName').value = order ? order.name : '';
+        document.getElementById('orderType').value = order ? (order.type || '') : '';
+        document.getElementById('orderEditId').value = orderId || '';
+        updateOrderSumPreview();
+        showModal('modal-order');
+    }
+
+    async function saveAdminOrder() {
+        const id = document.getElementById('orderEditId').value;
+        const projectId = parseInt(document.getElementById('orderProject').value);
+        const name = document.getElementById('orderName').value.trim();
+        const type = document.getElementById('orderType').value.trim();
+        if (!projectId) { alert('Выберите проект'); return; }
+        if (!name) { alert('Введите название заказа'); return; }
+        const data = { projectId, name, type };
+        if (id) {
+            await fetchAPI(`/orders/${id}`, 'PUT', data);
+        } else {
+            await fetchAPI('/orders', 'POST', data);
+        }
+        orders = await fetchAPI('/orders');
+        renderAdminOrders();
+        renderAdminClients();
+        hideModal('modal-order');
+    }
+
+    async function deleteAdminOrder(id) {
+        if (!confirm('Удалить заказ?')) return;
+        await fetchAPI(`/orders/${id}`, 'DELETE');
+        orders = orders.filter(o => o.id !== id);
+        renderAdminOrders();
+        renderAdminClients();
+    }
+
+    async function openClientView(clientId) {
+        const c = clients.find(x => x.id === clientId);
+        if (!c) return;
+        document.getElementById('clientViewId').value = clientId;
+        document.getElementById('clientViewInfo').innerHTML = `
+            <div class="d-flex flex-wrap gap-4">
+                <div><div class="text-muted small">Наименование</div><div class="fw-semibold">${c.name}</div></div>
+                <div><div class="text-muted small">Телефон</div><div class="fw-semibold">${c.phone || '—'}</div></div>
+                <div><div class="text-muted small">Email</div><div class="fw-semibold">${c.email || '—'}</div></div>
+                <div><div class="text-muted small">Долг</div><div class="fw-semibold">${c.debt || 0} ₽</div></div>
+            </div>`;
+
+        const projs = projects.filter(p => p.clientId === clientId);
+        let prHtml = '';
+        for (const p of projs) {
+            const ord = orders.find(o => o.projectId === p.id);
+            const sum = ord ? (Number(ord.sum) || 0) : 0;
+            const statusColor = p.status === 'Завершён' ? 'success' : (p.status === 'В работе' ? 'warning' : 'secondary');
+            prHtml += `<tr><td>${p.name}</td><td>${p.type || ''}</td><td><span class="badge bg-${statusColor}">${p.status || 'Новый'}</span></td><td class="text-end">${sum.toFixed(2)} ₽</td></tr>`;
+        }
+        document.getElementById('clientViewProjects').innerHTML = prHtml || '<tr><td colspan="4" class="text-muted text-center">Нет проектов</td></tr>';
+
+        await loadClientReviews(clientId);
+        showModal('modal-client-view');
+    }
+
+    async function loadClientReviews(clientId) {
+        const list = await fetchAPI(`/reviews?clientId=${clientId}`);
+        let html = '';
+        list.forEach(r => {
+            const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
+            html += `
+                <div class="d-flex justify-content-between align-items-start border-bottom py-2">
+                    <div><div class="text-warning">${stars}</div><div>${r.text || ''}</div><div class="text-muted small">${r.date || ''}</div></div>
+                    <button class="btn btn-link btn-sm text-danger" onclick="deleteReview(${r.id})"><i class="fas fa-trash"></i></button>
+                </div>`;
+        });
+        document.getElementById('clientViewReviews').innerHTML = html || '<div class="text-muted small">Отзывов пока нет</div>';
+    }
+
+    async function addClientReview() {
+        const clientId = parseInt(document.getElementById('clientViewId').value);
+        const text = document.getElementById('reviewText').value.trim();
+        const rating = parseInt(document.getElementById('reviewRating').value);
+        if (!text) { alert('Введите текст отзыва'); return; }
+        await fetchAPI('/reviews', 'POST', { clientId, text, rating });
+        document.getElementById('reviewText').value = '';
+        await loadClientReviews(clientId);
+    }
+
+    async function deleteReview(id) {
+        const clientId = parseInt(document.getElementById('clientViewId').value);
+        await fetchAPI(`/reviews/${id}`, 'DELETE');
+        await loadClientReviews(clientId);
+    }
+
+    async function loadAdminCalculation() {
+        const select = document.getElementById('calcProjectSelect');
+        const currentVal = select.value;
+        select.innerHTML = projects.map(p =>
+            `<option value="${p.id}">${p.name}</option>`
+        ).join('');
+        if (currentVal && projects.some(p => p.id == currentVal)) {
+            select.value = currentVal;
+        } else if (projects.length > 0) {
+            select.value = projects[0].id;
+        }
+
+        const projectId = parseInt(select.value);
+        if (!projectId) {
+            document.getElementById('calcTable').innerHTML = '<tr><td colspan="9">Выберите проект</td></tr>';
+            document.getElementById('calcTotals').innerHTML = '';
+            return;
+        }
+
+        try {
+            const items = await fetchAPI(`/project-items?projectId=${projectId}`);
+            projectItems = items;
+            let html = '';
+            let totalSum=0, totalTax=0, totalTotal=0, totalProfit=0;
+            items.forEach(it => {
+                const sum = Number(it.sum)||0;
+                const tax = Number(it.tax)||0;
+                const total = Number(it.total)||0;
+                const profit = Number(it.profit)||0;
+                totalSum += sum; totalTax += tax; totalTotal += total; totalProfit += profit;
+                const rateOptions = [5,7,10,22].map(r =>
+                    `<option value="${r}" ${Number(it.taxRate)===r?'selected':''}>${r}%</option>`).join('');
+                html += `
+                    <tr>
+                        <td>${it.name}</td>
+                        <td>${it.qty}</td>
+                        <td>${Number(it.price).toFixed(2)}</td>
+                        <td>${sum.toFixed(2)}</td>
+                        <td>
+                            <select class="form-select form-select-sm" style="width:78px;display:inline-block;" onchange="changeItemTax(${it.id}, this.value)">${rateOptions}</select>
+                            <div class="small text-muted">${tax.toFixed(2)}</div>
+                        </td>
+                        <td>${Number(it.cost).toFixed(2)}</td>
+                        <td>${total.toFixed(2)}</td>
+                        <td class="fw-semibold">${profit.toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm btn-icon" title="Изменить" onclick="editAdminItem(${it.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm btn-icon" title="Удалить" onclick="deleteAdminItem(${it.id})"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('calcTable').innerHTML = html || '<tr><td colspan="9">Нет строк</td></tr>';
+            document.getElementById('calcTotals').innerHTML = `
+                <tr style="font-weight:bold;">
+                    <td colspan="3">Итого:</td>
+                    <td>${totalSum.toFixed(2)}</td>
+                    <td>${totalTax.toFixed(2)}</td>
+                    <td></td>
+                    <td>${totalTotal.toFixed(2)}</td>
+                    <td>${totalProfit.toFixed(2)}</td>
+                    <td></td>
+                </tr>
+            `;
+        } catch (e) {
+            alert('Ошибка загрузки строк расчёта');
+        }
+    }
+
+    function openItemModal(itemId) {
+        const isEdit = !!itemId;
+        const item = isEdit ? projectItems.find(it => it.id === itemId) : null;
+        const projectId = parseInt(document.getElementById('calcProjectSelect').value);
+        if (!projectId) { alert('Сначала выберите проект'); return; }
+
+        document.getElementById('itemName').value = item ? item.name : '';
+        document.getElementById('itemQty').value = item ? item.qty : 1;
+        document.getElementById('itemPrice').value = item ? item.price : 0;
+        document.getElementById('itemTaxRate').value = item ? item.taxRate : 5;
+        document.getElementById('itemCost').value = item ? item.cost : 0;
+        document.getElementById('itemEditId').value = itemId || '';
+
+        showModal('modal-item');
+    }
+
+    function editAdminItem(id) { openItemModal(id); }
+
+    async function saveAdminItem() {
+        const id = document.getElementById('itemEditId').value;
+        const projectId = parseInt(document.getElementById('calcProjectSelect').value);
+        if (!projectId) { alert('Выберите проект'); return; }
+
+        const name = document.getElementById('itemName').value.trim();
+        const qty = parseFloat(document.getElementById('itemQty').value) || 0;
+        const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+        const taxRate = parseFloat(document.getElementById('itemTaxRate').value) || 0;
+        const cost = parseFloat(document.getElementById('itemCost').value) || 0;
+
+        if (!name) { alert('Введите наименование'); return; }
+
+        const data = { projectId, name, qty, price, taxRate, cost };
+        if (id) {
+            await fetchAPI(`/project-items/${id}`, 'PUT', data);
+            const idx = projectItems.findIndex(it => it.id === parseInt(id));
+            if (idx !== -1) {
+                const sum = qty * price;            
+                const tax = sum * (taxRate / 100);  
+                const total = qty * cost + tax;     
+                const profit = sum - total;         
+                projectItems[idx] = { ...projectItems[idx], ...data, sum, tax, total, profit };
+            }
+        } else {
+            const newItem = await fetchAPI('/project-items', 'POST', data);
+            projectItems.push(newItem);
+        }
+        await loadAdminCalculation();
+        await refreshOrders();
+        hideModal('modal-item');
+    }
+
+    async function changeItemTax(itemId, rate) {
+        const it = projectItems.find(x => x.id === itemId);
+        if (!it) return;
+        await fetchAPI(`/project-items/${itemId}`, 'PUT', {
+            name: it.name, qty: it.qty, price: it.price,
+            taxRate: parseFloat(rate), cost: it.cost
+        });
+        await loadAdminCalculation();
+        await refreshOrders();
+    }
+
+    async function refreshOrders() {
+        orders = await fetchAPI('/orders');
+        renderAdminOrders();
+    }
+
+    async function deleteAdminItem(id) {
+        if (!confirm('Удалить строку?')) return;
+        await fetchAPI(`/project-items/${id}`, 'DELETE');
+        projectItems = projectItems.filter(it => it.id !== id);
+        await loadAdminCalculation();
+        await refreshOrders();
+    }
+
+    function renderAdminTypes() {
+        let html = '';
+        projectTypes.forEach((t, idx) => {
+            html += `
+                <tr>
+                    <td>${t.name}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteAdminType(${t.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `;
+        });
+        document.getElementById('adminTypesTable').innerHTML = html || '<tr><td colspan="2">Нет типов</td></tr>';
+    }
+
+    async function saveAdminType() {
+        const name = document.getElementById('typeName').value.trim();
+        if (!name) { alert('Введите название'); return; }
+        try {
+            const newType = await fetchAPI('/project-types', 'POST', { name });
+            projectTypes.push({ id: newType.id, name });
+            renderAdminTypes();
+            hideModal('modal-type');
+            document.getElementById('typeName').value = '';
+        } catch (e) {
+            alert(e.message);
+        }
+    }
+
+    async function deleteAdminType(id) {
+        if (!confirm('Удалить тип?')) return;
+        await fetchAPI(`/project-types/${id}`, 'DELETE');
+        projectTypes = projectTypes.filter(t => t.id !== id);
+        renderAdminTypes();
+    }
+
+    async function quickAddClient() {
+        const name = prompt('Введите имя нового клиента:');
+        if (!name) return;
+        try {
+            const newClient = await fetchAPI('/clients', 'POST', { name, phone: '', email: '', debt: 0 });
+            clients.push({ id: newClient.id, name, phone: '', email: '', debt: 0 });
+            const select = document.getElementById('projClient');
+            select.innerHTML = clients.map(c =>
+                `<option value="${c.id}">${c.name}</option>`
+            ).join('');
+            select.value = newClient.id;
+            renderAdminClients();
+        } catch (e) {
+            alert(e.message);
+        }
+    }
+
+    function showModal(id) {
+        const modal = new bootstrap.Modal(document.getElementById(id));
+        modal.show();
+    }
+    function hideModal(id) {
+        const modal = bootstrap.Modal.getInstance(document.getElementById(id));
+        if (modal) modal.hide();
+    }
+
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('.admin-sidebar .nav-link');
+        if (link && link.dataset.page) {
+            const page = link.dataset.page;
+            document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
+            document.getElementById('admin-' + page).classList.add('active');
+            document.querySelectorAll('.admin-sidebar .nav-link').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            if (page === 'dashboard') renderAdminDashboard();
+            if (page === 'requests') renderAdminRequests();
+            if (page === 'clients') renderAdminClients();
+            if (page === 'projects') renderAdminProjects();
+            if (page === 'orders') renderAdminOrders();
+            if (page === 'calculation') loadAdminCalculation();
+            if (page === 'reference') renderAdminTypes();
+        }
+    });
+
+    showPublicSite();
+    loadAllData();
+
+    console.log('✅ CRM с SQLite готова! Админ: admin / admin');
+
+const originalShowPublicSite = showPublicSite;
+const originalShowAdminLogin = showAdminLogin;
+const originalShowAdminDashboard = showAdminDashboard;
+
+showPublicSite = function() {
+    originalShowPublicSite();
+    if (window.location.pathname !== '/') {
+        history.pushState(null, '', '/');
+    }
+};
+
+showAdminLogin = function() {
+    originalShowAdminLogin();
+    if (window.location.pathname !== '/admin') {
+        history.pushState(null, '', '/admin');
+    }
+};
+
+showAdminDashboard = function() {
+    originalShowAdminDashboard();
+    if (window.location.pathname !== '/admin') {
+        history.pushState(null, '', '/admin');
+    }
+};
+
+window.addEventListener('load', function() {
+    const path = window.location.pathname;
+    if (path === '/admin' || path.startsWith('/admin')) {
+
+        showAdminLogin();
+
+    } else {
+        showPublicSite();
+    }
+});
+
+window.addEventListener('popstate', function() {
+    const path = window.location.pathname;
+    if (path === '/admin') {
+        showAdminLogin();
+    } else {
+        showPublicSite();
+    }
+});
+</script>
+</body>
+</html>
