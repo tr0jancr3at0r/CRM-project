@@ -31,7 +31,7 @@ git init
 git add .
 git commit -m "CRM проект"
 git branch -M main
-git remote add origin https://github.com/ВАШ_ЛОГИН/crm-proekt.git
+git remote add origin https://github.com/ВАШ_ЛОГИН/crm-project.git
 git push -u origin main
 ```
 
@@ -41,8 +41,8 @@ git push -u origin main
 После этого любой может склонировать проект и запустить:
 
 ```bash
-git clone https://github.com/ВАШ_ЛОГИН/crm-proekt.git
-cd crm-proekt
+git clone https://github.com/ВАШ_ЛОГИН/crm-project.git
+cd crm-proeject
 pip install -r requirements.txt
 python app.py
 ```
@@ -65,7 +65,7 @@ gunicorn wsgi:application --bind 0.0.0.0:$PORT
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `gunicorn wsgi:application --bind 0.0.0.0:$PORT`
    - Instance Type: **Free**.
-4. Готово — получите адрес вида `https://crm-proekt.onrender.com`.
+4. Готово — получите адрес вида `https://crm-project.onrender.com`.
 
 ### Вариант Б — PythonAnywhere (лучший для SQLite — диск НЕ стирается)
 1. <https://www.pythonanywhere.com> → бесплатный аккаунт.
