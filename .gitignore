@@ -1,14 +1,14 @@
-# Python
+# питон
 __pycache__/
 *.pyc
 .venv/
 venv/
 env/
 
-# База данных (создаётся автоматически при первом запуске)
+# база данных 
 database.db
 
-# Логи
+# логи
 *.log
 log.txt
 
@@ -16,4 +16,3 @@ log.txt
 .vscode/
 .idea/
 .DS_Store
-.claude/
